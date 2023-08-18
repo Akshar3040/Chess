@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 using System.Diagnostics.CodeAnalysis;
-
+using System.Collections.Generic;
 
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 public sealed class ChessBoardPlacementHandler : MonoBehaviour {

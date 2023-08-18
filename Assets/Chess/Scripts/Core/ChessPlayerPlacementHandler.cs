@@ -2,105 +2,92 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace Chess.Scripts.Core
-{
+
     public class ChessPlayerPlacementHandler : MonoBehaviour
     {
-        [SerializeField] public int row, column;
+        [SerializeField] int row, column;
+    
 
-        private void Start()
+    private void Start()
         {
-            transform.position = ChessBoardPlacementHandler.Instance.GetTile(row, column).transform.position;
+            transform.position = ChessBoardPlacementHandler.Instance.GetTile(row, column).transform.position;             
         }
 
         private void OnMouseDown()
         {
-            HighlightValidMoves();
+            HiglightMoves();
         }
 
         private void OnMouseUp()
         {
-            ClearValidMoves();
+            ClearMove();
         }
 
-        private void HighlightValidMoves()
+    private void HiglightMoves()
+    {
+        var validMovement = MoveCalculator.Validmoves(gameObject.name, row, column);
+        foreach (var move in validMovement)
         {
-            var validMoves = ValidMovesCalculator.GetValidMoves(gameObject.name, row, column);
-
-            foreach (var move in validMoves)
-            {
-                
-                    ChessBoardPlacementHandler.Instance.Highlight(move.row, move.column);              
-            }
+          ChessBoardPlacementHandler.Instance.Highlight(move.row, move.column);          
         }
-
-        private void ClearValidMoves()
+    }
+    
+    private void ClearMove()
         {
             ChessBoardPlacementHandler.Instance.ClearHighlights();
         }
     }
 
-    public static class ValidMovesCalculator
+public static class MoveCalculator
     {
-        public static List<(int row, int column)> GetValidMoves(string pieceName, int currentRow, int currentColumn)
+        public static List<(int row, int column)> Validmoves(string pieceName, int currentRow, int currentColumn)
         {
-            List<(int row, int column)> validMoves = new List<(int row, int column)>();
+            List<(int row, int column)> moves = new List<(int row, int column)>();   
 
+                
             if (pieceName.StartsWith("Pawn"))
-            {
-                // Pawn movement: Move forward one square and capture diagonally
-                validMoves.Add((currentRow + 1, currentColumn));
-                validMoves.Add((currentRow + 1, currentColumn + 1));
-                validMoves.Add((currentRow + 1, currentColumn - 1));
+            {                
+                moves.Add((currentRow + 1, currentColumn));
             }
             else if (pieceName.StartsWith("Rook"))
-            {
-                // Rook movement: Vertically or horizontally any number of squares
-                AddStraightMoves(validMoves, currentRow, currentColumn);
+            {                
+                straightMove(moves, currentRow, currentColumn);
             }
             else if (pieceName.StartsWith("Knight"))
-            {
-                // Knight movement: L-shaped, 2 squares in one direction and 1 square perpendicular
-                AddKnightMoves(validMoves, currentRow, currentColumn);
+            {               
+                knightMove(moves, currentRow, currentColumn);
             }
             else if (pieceName.StartsWith("Bishop"))
-            {
-                // Bishop movement: Diagonally any number of squares
-                AddDiagonalMoves(validMoves, currentRow, currentColumn);
+            {              
+                diagnolMove(moves, currentRow, currentColumn);
             }
             else if (pieceName.StartsWith("Queen"))
-            {
-                // Queen movement: Combines rook and bishop movement
-                AddStraightMoves(validMoves, currentRow, currentColumn);
-                AddDiagonalMoves(validMoves, currentRow, currentColumn);
+            {                
+               straightMove(moves, currentRow, currentColumn);
+                diagnolMove(moves, currentRow, currentColumn);
             }
             else if (pieceName.StartsWith("King"))
-            {
-                // King movement: One square in any direction
-                AddAdjacentMoves(validMoves, currentRow, currentColumn);
+            {                
+                addjacentMove(moves, currentRow, currentColumn);
             }
-
-            return validMoves;
+       
+            return moves;
         }
 
-        private static void AddStraightMoves(List<(int, int)> validMoves, int currentRow, int currentColumn)
+        private static void straightMove(List<(int, int)> validMoves, int currentRow, int currentColumn)
         {
-            // Add vertical moves
-            for (int i = currentRow + 1; i < 8; i++)
-                validMoves.Add((i, currentColumn));
-            for (int i = currentRow - 1; i >= 0; i--)
-                validMoves.Add((i, currentColumn));
-
-            // Add horizontal moves
-            for (int j = currentColumn + 1; j < 8; j++)
-                validMoves.Add((currentRow, j));
-            for (int j = currentColumn - 1; j >= 0; j--)
-                validMoves.Add((currentRow, j));
+          for (int i = currentRow + 1; i < 8; i++)        
+              validMoves.Add((i, currentColumn));
+          for (int i = currentRow - 1; i >= 0; i--)        
+              validMoves.Add((i, currentColumn));
+          for (int j = currentColumn + 1; j < 8; j++)
+              validMoves.Add((currentRow, j));
+          for (int j = currentColumn - 1; j >= 0; j--)
+              validMoves.Add((currentRow, j));
         }
 
-        private static void AddDiagonalMoves(List<(int, int)> validMoves, int currentRow, int currentColumn)
-        {
-            // Add diagonal moves
+        private static void diagnolMove(List<(int, int)> validMoves, int currentRow, int currentColumn)
+        {            
             for (int i = currentRow + 1, j = currentColumn + 1; i < 8 && j < 8; i++, j++)
                 validMoves.Add((i, j));
             for (int i = currentRow - 1, j = currentColumn - 1; i >= 0 && j >= 0; i--, j--)
@@ -111,37 +98,34 @@ namespace Chess.Scripts.Core
                 validMoves.Add((i, j));
         }
 
-        private static void AddKnightMoves(List<(int, int)> validMoves, int currentRow, int currentColumn)
-        {
-            // Knight moves in L-shape
-            AddIfInBounds(validMoves, currentRow + 2, currentColumn + 1);
-            AddIfInBounds(validMoves, currentRow + 2, currentColumn - 1);
-            AddIfInBounds(validMoves, currentRow - 2, currentColumn + 1);
-            AddIfInBounds(validMoves, currentRow - 2, currentColumn - 1);
-            AddIfInBounds(validMoves, currentRow + 1, currentColumn + 2);
-            AddIfInBounds(validMoves, currentRow - 1, currentColumn + 2);
-            AddIfInBounds(validMoves, currentRow + 1, currentColumn - 2);
-            AddIfInBounds(validMoves, currentRow - 1, currentColumn - 2);
+        private static void knightMove(List<(int, int)> validMoves, int currentRow, int currentColumn)
+        {            
+            InBound(validMoves, currentRow + 2, currentColumn + 1);
+            InBound(validMoves, currentRow + 2, currentColumn - 1);
+            InBound(validMoves, currentRow - 2, currentColumn + 1);
+            InBound(validMoves, currentRow - 2, currentColumn - 1);
+            InBound(validMoves, currentRow + 1, currentColumn + 2);
+            InBound(validMoves, currentRow - 1, currentColumn + 2);
+            InBound(validMoves, currentRow + 1, currentColumn - 2);
+            InBound(validMoves, currentRow - 1, currentColumn - 2);
         }
 
-        private static void AddAdjacentMoves(List<(int, int)> validMoves, int currentRow, int currentColumn)
-        {
-            // King moves in any direction by one square
-            AddIfInBounds(validMoves, currentRow + 1, currentColumn);
-            AddIfInBounds(validMoves, currentRow - 1, currentColumn);
-            AddIfInBounds(validMoves, currentRow, currentColumn + 1);
-            AddIfInBounds(validMoves, currentRow, currentColumn - 1);
-            AddIfInBounds(validMoves, currentRow + 1, currentColumn + 1);
-            AddIfInBounds(validMoves, currentRow + 1, currentColumn - 1);
-            AddIfInBounds(validMoves, currentRow - 1, currentColumn + 1);
-            AddIfInBounds(validMoves, currentRow - 1, currentColumn - 1);
+        private static void addjacentMove(List<(int, int)> validMoves, int currentRow, int currentColumn)
+        {            
+            InBound(validMoves, currentRow + 1, currentColumn);
+            InBound(validMoves, currentRow - 1, currentColumn);
+            InBound(validMoves, currentRow, currentColumn + 1);
+            InBound(validMoves, currentRow, currentColumn - 1);
+            InBound(validMoves, currentRow + 1, currentColumn + 1);
+            InBound(validMoves, currentRow + 1, currentColumn - 1);
+            InBound(validMoves, currentRow - 1, currentColumn + 1);
+            InBound
+            (validMoves, currentRow - 1, currentColumn - 1);
         }
 
-        private static void AddIfInBounds(List<(int, int)> validMoves, int row, int column)
+        private static void InBound(List<(int, int)> validMoves, int row, int column)
         {
             if (row >= 0 && row < 8 && column >= 0 && column < 8)
                 validMoves.Add((row, column));
         }
-    }
-}
-
+ }
