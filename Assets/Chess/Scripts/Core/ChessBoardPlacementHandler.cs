@@ -12,23 +12,19 @@ public sealed class ChessBoardPlacementHandler : MonoBehaviour {
     
     internal static ChessBoardPlacementHandler Instance;
 
-    private void Awake() {
+    private void Awake() 
+    {
         Instance = this;
         GenerateArray();
     }
-
-    
-
     private void GenerateArray() {
         _chessBoard = new GameObject[8, 8];
         for (var i = 0; i < 8; i++) {
             for (var j = 0; j < 8; j++) {
                 _chessBoard[i, j] = _rowsArray[i].transform.GetChild(j).gameObject;
             }
-        }
-       
+        }       
     }
-
     internal GameObject GetTile(int i, int j) {
         try {
             return _chessBoard[i, j];
@@ -37,7 +33,6 @@ public sealed class ChessBoardPlacementHandler : MonoBehaviour {
             return null;
         }
     }
-
     internal void Highlight(int row, int col)
     {
         var tile = GetTile(row, col).transform;
@@ -46,9 +41,6 @@ public sealed class ChessBoardPlacementHandler : MonoBehaviour {
             Debug.LogError("Invalid row or column.");
             return;
         }
-
-        
-
         Instantiate(_highlightPrefab, tile.transform.position, Quaternion.identity, tile.transform);
     }
 
@@ -63,8 +55,6 @@ public sealed class ChessBoardPlacementHandler : MonoBehaviour {
         }
         return false;
     }
-
-
     internal void ClearHighlights() {
         for (var i = 0; i < 8; i++) {
             for (var j = 0; j < 8; j++) {
@@ -76,16 +66,12 @@ public sealed class ChessBoardPlacementHandler : MonoBehaviour {
             }
         }
     }
-
-
-    public void AddPlayerToPlayerList(GameObject playerObject, int row, int column)
+    public void PlayerList(GameObject playerObject, int row, int column)
     {
-        playerList.Add((playerObject, row, column));
-        
+        playerList.Add((playerObject, row, column));        
     }
-    public List<(GameObject playerObject, int row, int column)> GetPlayerList()
-    {
-        
+    public List<(GameObject playerObject, int row, int column)> PlayerList()
+    {        
         return playerList;
     }
 }
