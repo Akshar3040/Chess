@@ -8,13 +8,16 @@ public sealed class ChessBoardPlacementHandler : MonoBehaviour {
     [SerializeField] private GameObject[] _rowsArray;
     [SerializeField] private GameObject _highlightPrefab;
     private GameObject[,] _chessBoard;
-
+    [SerializeField] List<(GameObject playerObject, int row, int column)> playerList = new List<(GameObject, int, int)>();
+    
     internal static ChessBoardPlacementHandler Instance;
 
     private void Awake() {
         Instance = this;
         GenerateArray();
     }
+
+    
 
     private void GenerateArray() {
         _chessBoard = new GameObject[8, 8];
@@ -23,6 +26,7 @@ public sealed class ChessBoardPlacementHandler : MonoBehaviour {
                 _chessBoard[i, j] = _rowsArray[i].transform.GetChild(j).gameObject;
             }
         }
+       
     }
 
     internal GameObject GetTile(int i, int j) {
@@ -34,15 +38,32 @@ public sealed class ChessBoardPlacementHandler : MonoBehaviour {
         }
     }
 
-    internal void Highlight(int row, int col) {
+    internal void Highlight(int row, int col)
+    {
         var tile = GetTile(row, col).transform;
-        if (tile == null) {
+        if (tile == null)
+        {
             Debug.LogError("Invalid row or column.");
             return;
         }
 
+        
+
         Instantiate(_highlightPrefab, tile.transform.position, Quaternion.identity, tile.transform);
     }
+
+    public bool TileOccupied(int row, int col)
+    {
+        foreach (var playerTuple in playerList)
+        {
+            if (playerTuple.row == row && playerTuple.column == col)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     internal void ClearHighlights() {
         for (var i = 0; i < 8; i++) {
@@ -54,5 +75,17 @@ public sealed class ChessBoardPlacementHandler : MonoBehaviour {
                 }
             }
         }
+    }
+
+
+    public void AddPlayerToPlayerList(GameObject playerObject, int row, int column)
+    {
+        playerList.Add((playerObject, row, column));
+        
+    }
+    public List<(GameObject playerObject, int row, int column)> GetPlayerList()
+    {
+        
+        return playerList;
     }
 }

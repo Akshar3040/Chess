@@ -6,14 +6,22 @@ using System.Collections.Generic;
     public class ChessPlayerPlacementHandler : MonoBehaviour
     {
         [SerializeField] int row, column;
-    
+       [SerializeField] GameObject playerObject;
+
+
 
     private void Start()
-        {
-            transform.position = ChessBoardPlacementHandler.Instance.GetTile(row, column).transform.position;             
-        }
+    {
+        playerObject = gameObject;
 
-        private void OnMouseDown()
+        
+        ChessBoardPlacementHandler.Instance.AddPlayerToPlayerList(playerObject, row, column);
+
+        transform.position = ChessBoardPlacementHandler.Instance.GetTile(row, column).transform.position;
+    }
+
+
+    private void OnMouseDown()
         {
             HiglightMoves();
         }
@@ -28,10 +36,14 @@ using System.Collections.Generic;
         var validMovement = MoveCalculator.Validmoves(gameObject.name, row, column);
         foreach (var move in validMovement)
         {
-          ChessBoardPlacementHandler.Instance.Highlight(move.row, move.column);          
+            if (!ChessBoardPlacementHandler.Instance.TileOccupied(move.row, move.column))
+            {
+                ChessBoardPlacementHandler.Instance.Highlight(move.row, move.column);
+            }
+            
         }
     }
-    
+
     private void ClearMove()
         {
             ChessBoardPlacementHandler.Instance.ClearHighlights();
