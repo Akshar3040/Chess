@@ -6,7 +6,7 @@ using System.Collections.Generic;
     public class ChessPlayerPlacementHandler : MonoBehaviour
     {
         [SerializeField] int row, column;
-       [SerializeField] GameObject playerObject;
+        protected GameObject playerObject;
 
 
 
@@ -16,7 +16,6 @@ using System.Collections.Generic;
 
         
         ChessBoardPlacementHandler.Instance.AddPlayerToPlayerList(playerObject, row, column);
-
         transform.position = ChessBoardPlacementHandler.Instance.GetTile(row, column).transform.position;
     }
 
@@ -88,26 +87,61 @@ public static class MoveCalculator
 
         private static void straightMove(List<(int, int)> validMoves, int currentRow, int currentColumn)
         {
-          for (int i = currentRow + 1; i < 8; i++)        
-              validMoves.Add((i, currentColumn));
-          for (int i = currentRow - 1; i >= 0; i--)        
-              validMoves.Add((i, currentColumn));
+          for (int i = currentRow + 1; i < 8; i++)
+          {
+              if (ChessBoardPlacementHandler.Instance.TileOccupied(i, currentColumn))
+                  break;
+                validMoves.Add((i, currentColumn));          
+          }       
+          for (int i = currentRow - 1; i >= 0; i--)
+          {
+              if (ChessBoardPlacementHandler.Instance.TileOccupied(i, currentColumn))
+                  break;
+                validMoves.Add((i, currentColumn));         
+          }        
           for (int j = currentColumn + 1; j < 8; j++)
+        {
+            if (ChessBoardPlacementHandler.Instance.TileOccupied(currentRow, j))            
+                break;
               validMoves.Add((currentRow, j));
+            
+        }    
           for (int j = currentColumn - 1; j >= 0; j--)
-              validMoves.Add((currentRow, j));
+        {
+            if (ChessBoardPlacementHandler.Instance.TileOccupied(currentRow, j))            
+                break;
+               validMoves.Add((currentRow, j));
+
+            
+        }
         }
 
         private static void diagnolMove(List<(int, int)> validMoves, int currentRow, int currentColumn)
         {            
             for (int i = currentRow + 1, j = currentColumn + 1; i < 8 && j < 8; i++, j++)
+        {
+            if (ChessBoardPlacementHandler.Instance.TileOccupied(i, j))
+                break;
                 validMoves.Add((i, j));
+        }
             for (int i = currentRow - 1, j = currentColumn - 1; i >= 0 && j >= 0; i--, j--)
+        {
+            if (ChessBoardPlacementHandler.Instance.TileOccupied(i, j))
+                break;
                 validMoves.Add((i, j));
+        }
             for (int i = currentRow + 1, j = currentColumn - 1; i < 8 && j >= 0; i++, j--)
-                validMoves.Add((i, j));
+        {
+            if (ChessBoardPlacementHandler.Instance.TileOccupied(i, j))
+                break;
+             validMoves.Add((i, j));
+        }
             for (int i = currentRow - 1, j = currentColumn + 1; i >= 0 && j < 8; i--, j++)
-                validMoves.Add((i, j));
+        {
+            if (ChessBoardPlacementHandler.Instance.TileOccupied(i, j))
+                break;
+            validMoves.Add((i, j));
+        }
         }
 
         private static void knightMove(List<(int, int)> validMoves, int currentRow, int currentColumn)
@@ -131,8 +165,7 @@ public static class MoveCalculator
             InBound(validMoves, currentRow + 1, currentColumn + 1);
             InBound(validMoves, currentRow + 1, currentColumn - 1);
             InBound(validMoves, currentRow - 1, currentColumn + 1);
-            InBound
-            (validMoves, currentRow - 1, currentColumn - 1);
+            InBound(validMoves, currentRow - 1, currentColumn - 1);
         }
 
         private static void InBound(List<(int, int)> validMoves, int row, int column)
